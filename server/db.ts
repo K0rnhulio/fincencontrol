@@ -200,6 +200,19 @@ export function deleteTransaction(id: number): boolean {
   return info.changes > 0;
 }
 
+export function resetAllTransactions(): void {
+  db.prepare('DELETE FROM transactions').run();
+  if (fs.existsSync(UPLOADS_DIR)) {
+    for (const file of fs.readdirSync(UPLOADS_DIR)) {
+      try {
+        fs.unlinkSync(path.join(UPLOADS_DIR, file));
+      } catch {
+        // ignore
+      }
+    }
+  }
+}
+
 export function getSummaryStats() {
   const totals = db
     .prepare(

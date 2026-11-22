@@ -13,6 +13,7 @@ import {
   getSummaryStats,
   getTransactionById,
   listTransactions,
+  resetAllTransactions,
   updateTransaction,
 } from './db';
 import { runSlipOcr } from './ocr';
@@ -231,6 +232,17 @@ app.delete('/api/transactions/:id', requireAuth, (req, res) => {
   const ok = deleteTransaction(id);
   if (!ok) return res.status(404).json({ error: 'Not found' });
   res.json({ ok: true });
+});
+
+// Reset all data back to 0
+app.post('/api/reset', requireAuth, (_req, res) => {
+  try {
+    resetAllTransactions();
+    res.json({ ok: true });
+  } catch (err) {
+    console.error('Reset error:', err);
+    res.status(500).json({ error: 'Failed to reset data' });
+  }
 });
 
 // Export CSV
