@@ -1,5 +1,5 @@
 import React from 'react';
-import { CreditCard, ArrowDownLeft, ArrowUpRight, Receipt } from 'lucide-react';
+import { CreditCard, ArrowDownLeft, ArrowUpRight } from 'lucide-react';
 import { SummaryStats } from '../types';
 import { formatVND } from '../utils/format';
 
@@ -14,7 +14,7 @@ export const OverviewCards: React.FC<OverviewCardsProps> = ({ summary }) => {
       : 0;
 
   return (
-    <div className="grid grid-cols-2 lg:grid-cols-4 gap-3 sm:gap-4">
+    <div className="grid grid-cols-2 lg:grid-cols-3 gap-3 sm:gap-4">
       {/* Money Left on Card — Debit Card Hero */}
       <div className="col-span-2 lg:col-span-1 relative overflow-hidden rounded-3xl bg-gradient-to-br from-teal-600 via-teal-600 to-sky-600 p-5 text-white shadow-lg shadow-teal-600/20">
         <div className="flex items-center justify-between mb-3">
@@ -76,24 +76,6 @@ export const OverviewCards: React.FC<OverviewCardsProps> = ({ summary }) => {
         </div>
         <p className="mt-1.5 text-xs text-slate-400">
           {summary.expenseCount} {summary.expenseCount === 1 ? 'payment' : 'payments'}
-        </p>
-      </div>
-
-      {/* Average Payment */}
-      <div className="col-span-2 lg:col-span-1 rounded-3xl border border-slate-200/80 bg-white p-4 sm:p-5 shadow-sm">
-        <div className="flex items-center justify-between mb-2 sm:mb-3">
-          <span className="text-xs font-semibold text-slate-500">Average Payment</span>
-          <div className="h-8 w-8 rounded-xl bg-sky-50 flex items-center justify-center text-sky-600">
-            <Receipt className="w-4 h-4" />
-          </div>
-        </div>
-        <div className="text-xl sm:text-2xl font-bold font-mono-num text-slate-800">
-          {summary.expenseCount > 0
-            ? formatVND(Math.round(summary.totalSpent / summary.expenseCount))
-            : '0 ₫'}
-        </div>
-        <p className="mt-1.5 text-xs text-slate-400">
-          {summary.totalCount} total {summary.totalCount === 1 ? 'item' : 'items'} saved
         </p>
       </div>
     </div>
