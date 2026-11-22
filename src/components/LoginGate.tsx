@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { Lock, ArrowRight, ShieldCheck } from 'lucide-react';
+import { Lock, ArrowRight, Wallet } from 'lucide-react';
 
 interface LoginGateProps {
   onSuccess: () => void;
@@ -23,48 +23,45 @@ export const LoginGate: React.FC<LoginGateProps> = ({ onSuccess }) => {
       if (res.ok) {
         onSuccess();
       } else {
-        setError('Incorrect password. Please try again.');
+        setError('That password is not right. Please try again.');
       }
     } catch {
-      setError('Connection error.');
+      setError('Could not connect. Please check your internet.');
     } finally {
       setLoading(false);
     }
   };
 
   return (
-    <div className="min-h-screen flex items-center justify-center bg-slate-950 px-4">
-      <div className="w-full max-w-sm rounded-2xl border border-slate-800 bg-slate-900/90 p-7 shadow-2xl">
-        <div className="flex items-center gap-3 mb-6">
-          <div className="h-11 w-11 rounded-xl bg-emerald-500/15 border border-emerald-500/30 flex items-center justify-center text-emerald-400">
-            <ShieldCheck className="w-6 h-6" />
+    <div className="min-h-screen flex items-center justify-center bg-slate-50 px-4">
+      <div className="w-full max-w-sm rounded-3xl border border-slate-200 bg-white p-7 shadow-xl shadow-slate-200/60">
+        <div className="flex flex-col items-center text-center mb-6">
+          <div className="h-14 w-14 rounded-2xl bg-teal-50 border border-teal-200 flex items-center justify-center text-teal-600 mb-3">
+            <Wallet className="w-7 h-7" />
           </div>
-          <div>
-            <h1 className="text-lg font-semibold text-white">FinControl</h1>
-            <p className="text-xs text-slate-400">Debit Card &amp; Slip Tracker</p>
-          </div>
+          <h1 className="text-xl font-bold text-slate-900">My Debit Card</h1>
+          <p className="text-sm text-slate-500 mt-1">
+            Enter your password to view your card &amp; slips
+          </p>
         </div>
 
         <form onSubmit={handleSubmit} className="space-y-4">
           <div>
-            <label className="block text-xs font-medium text-slate-300 mb-1.5">
-              Access Password
-            </label>
             <div className="relative">
-              <Lock className="w-4 h-4 text-slate-500 absolute left-3.5 top-1/2 -translate-y-1/2" />
+              <Lock className="w-4 h-4 text-slate-400 absolute left-4 top-1/2 -translate-y-1/2" />
               <input
                 type="password"
                 value={password}
                 onChange={(e) => setPassword(e.target.value)}
                 placeholder="Enter password..."
                 autoFocus
-                className="w-full rounded-xl border border-slate-700 bg-slate-950 pl-10 pr-4 py-2.5 text-sm text-white placeholder:text-slate-500 focus:border-emerald-500 focus:outline-none"
+                className="w-full rounded-2xl border border-slate-200 bg-slate-50 pl-11 pr-4 py-3.5 text-base text-slate-900 placeholder:text-slate-400 focus:border-teal-500 focus:bg-white focus:outline-none transition"
               />
             </div>
           </div>
 
           {error && (
-            <p className="text-xs text-rose-400 bg-rose-500/10 border border-rose-500/20 rounded-lg px-3 py-2">
+            <p className="text-xs text-rose-600 bg-rose-50 border border-rose-200 rounded-xl px-3.5 py-2.5 text-center">
               {error}
             </p>
           )}
@@ -72,9 +69,9 @@ export const LoginGate: React.FC<LoginGateProps> = ({ onSuccess }) => {
           <button
             type="submit"
             disabled={loading || !password}
-            className="w-full flex items-center justify-center gap-2 rounded-xl bg-emerald-500 hover:bg-emerald-400 disabled:opacity-50 text-slate-950 font-semibold py-2.5 text-sm transition cursor-pointer"
+            className="w-full flex items-center justify-center gap-2 rounded-2xl bg-teal-600 hover:bg-teal-500 disabled:opacity-50 text-white font-semibold py-3.5 text-base shadow-md shadow-teal-600/20 transition cursor-pointer"
           >
-            {loading ? 'Unlocking...' : 'Unlock Dashboard'}
+            {loading ? 'Opening...' : 'Open Card Tracker'}
             <ArrowRight className="w-4 h-4" />
           </button>
         </form>

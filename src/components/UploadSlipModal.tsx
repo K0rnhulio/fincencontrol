@@ -2,11 +2,12 @@ import React, { useState, useRef, useEffect } from 'react';
 import {
   X,
   Upload,
-  Sparkles,
   Loader2,
   CheckCircle2,
   Image as ImageIcon,
-  FileText,
+  ChevronDown,
+  ChevronUp,
+  Receipt,
 } from 'lucide-react';
 import { DEFAULT_CATEGORIES, OcrResult, TransactionType } from '../types';
 import { formatVndInput, parseVndInput } from '../utils/format';
@@ -28,9 +29,8 @@ export const UploadSlipModal: React.FC<UploadSlipModalProps> = ({
   const [slipImagePath, setSlipImagePath] = useState<string | null>(null);
   const [ocrLoading, setOcrLoading] = useState(false);
   const [ocrDone, setOcrDone] = useState(false);
-  const [ocrEngine, setOcrEngine] = useState<string>('');
   const [rawText, setRawText] = useState<string | null>(null);
-  const [showRawText, setShowRawText] = useState(false);
+  const [showBankDetails, setShowBankDetails] = useState(false);
 
   const [type, setType] = useState<TransactionType>('expense');
   const [amountInput, setAmountInput] = useState('');
@@ -58,7 +58,7 @@ export const UploadSlipModal: React.FC<UploadSlipModalProps> = ({
 
   const processFile = async (file: File) => {
     if (!file.type.startsWith('image/')) {
-      setError('Please upload an image file (JPG, PNG, WEBP).');
+      setError('Please choose a photo or screenshot.');
       return;
     }
     setError('');
@@ -73,10 +73,9 @@ export const UploadSlipModal: React.FC<UploadSlipModalProps> = ({
         method: 'POST',
         body: formData,
       });
-      if (!res.ok) throw new Error('OCR upload failed');
+      if (!res.ok) throw new Error('Scan failed');
       const data = (await res.json()) as { slipImagePath: string; ocr: OcrResult };
       setSlipImagePath(data.slipImagePath);
-      setOcrEngine(data.ocr.engine);
       setRawText(data.ocr.rawText || null);
 
       if (data.ocr.amount) {
@@ -96,21 +95,19 @@ export const UploadSlipModal: React.FC<UploadSlipModalProps> = ({
 
       setOcrDone(true);
       setTimeout(() => purposeInputRef.current?.focus(), 100);
-    } catch (err) {
-      setError('Failed to scan bank slip. You can still enter the details manually.');
+    } catch {
+      setError('Could not read the slip automatically — you can still type the amount below.');
     } finally {
       setOcrLoading(false);
     }
   };
 
-  // If opened with an initialFile from the direct image picker, scan it immediately
   useEffect(() => {
     if (initialFile) {
       processFile(initialFile);
     }
   }, [initialFile]);
 
-  // Allow Ctrl+V / Cmd+V paste of screenshot anywhere while modal is open
   useEffect(() => {
     const handlePaste = (e: ClipboardEvent) => {
       const items = e.clipboardData?.items;
@@ -133,11 +130,11 @@ export const UploadSlipModal: React.FC<UploadSlipModalProps> = ({
     e.preventDefault();
     const amount = parseVndInput(amountInput);
     if (amount <= 0) {
-      setError('Please enter a valid VND amount.');
+      setError('Please enter how much was paid (in VND).');
       return;
     }
     if (!purpose.trim()) {
-      setError('Please write what this payment was done for.');
+      setError('Please write what this payment was for.');
       purposeInputRef.current?.focus();
       return;
     }
@@ -165,44 +162,44 @@ export const UploadSlipModal: React.FC<UploadSlipModalProps> = ({
       });
       if (!res.ok) {
         const d = await res.json().catch(() => ({}));
-        throw new Error(d.error || 'Failed to save transaction');
+        throw new Error(d.error || 'Could not save');
       }
       onSaved();
       onClose();
     } catch (err: unknown) {
-      setError(err instanceof Error ? err.message : 'Failed to save');
+      setError(err instanceof Error ? err.message : 'Could not save');
     } finally {
       setSaving(false);
     }
   };
 
   return (
-    <div className="fixed inset-0 z-50 flex items-end sm:items-center justify-center bg-black/75 backdrop-blur-sm p-0 sm:p-4 overflow-y-auto">
-      <div className="w-full max-w-4xl rounded-t-2xl sm:rounded-2xl border border-slate-800 bg-slate-900 shadow-2xl overflow-hidden max-h-[94dvh] flex flex-col">
+    <div className="fixed inset-0 z-50 flex items-end sm:items-center justify-center bg-slate-900/50 backdrop-blur-xs p-0 sm:p-4 overflow-y-auto">
+      <div className="w-full max-w-4xl rounded-t-3xl sm:rounded-3xl border border-slate-200 bg-white shadow-2xl overflow-hidden max-h-[94dvh] flex flex-col">
         {/* Header */}
-        <div className="flex items-center justify-between px-4 sm:px-6 py-3.5 sm:py-4 border-b border-slate-800 shrink-0">
-          <div className="flex items-center gap-2.5">
-            <div className="h-9 w-9 rounded-xl bg-emerald-500/15 border border-emerald-500/30 flex items-center justify-center text-emerald-400">
-              <Sparkles className="w-4 h-4" />
+        <div className="flex items-center justify-between px-5 py-4 border-b border-slate-100 shrink-0">
+          <div className="flex items-center gap-3">
+            <div className="h-10 w-10 rounded-2xl bg-teal-50 border border-teal-100 flex items-center justify-center text-teal-600">
+              <Receipt className="w-5 h-5" />
             </div>
             <div>
-              <h2 className="text-base font-semibold text-white">Upload Bank Slip</h2>
-              <p className="text-xs text-slate-400">
-                Drop or paste (Ctrl+V) a screenshot — OCR auto-fills amount, recipient &amp; date
+              <h2 className="text-base font-bold text-slate-900">Save Bank Slip</h2>
+              <p className="text-xs text-slate-500">
+                Check the amount &amp; write what it was for
               </p>
             </div>
           </div>
           <button
             onClick={onClose}
-            className="rounded-lg p-1.5 text-slate-400 hover:text-white hover:bg-slate-800 transition cursor-pointer"
+            className="rounded-xl p-2 text-slate-400 hover:text-slate-700 hover:bg-slate-100 transition cursor-pointer"
           >
             <X className="w-5 h-5" />
           </button>
         </div>
 
         <form onSubmit={handleSubmit} className="grid grid-cols-1 md:grid-cols-12 overflow-y-auto flex-1">
-          {/* Left: Slip Dropzone / Preview */}
-          <div className="md:col-span-5 p-5 border-b md:border-b-0 md:border-r border-slate-800 bg-slate-950/50 flex flex-col">
+          {/* Left: Slip Preview */}
+          <div className="md:col-span-5 p-4 sm:p-5 border-b md:border-b-0 md:border-r border-slate-100 bg-slate-50/70 flex flex-col">
             {!previewUrl ? (
               <div
                 onDragOver={(e) => {
@@ -217,38 +214,35 @@ export const UploadSlipModal: React.FC<UploadSlipModalProps> = ({
                   if (file) processFile(file);
                 }}
                 onClick={() => fileInputRef.current?.click()}
-                className={`flex-1 min-h-[280px] rounded-xl border-2 border-dashed flex flex-col items-center justify-center p-6 text-center cursor-pointer transition ${
+                className={`flex-1 min-h-[220px] rounded-2xl border-2 border-dashed flex flex-col items-center justify-center p-6 text-center cursor-pointer transition ${
                   dragActive
-                    ? 'border-emerald-400 bg-emerald-500/10'
-                    : 'border-slate-700 hover:border-slate-500 bg-slate-900/40'
+                    ? 'border-teal-500 bg-teal-50'
+                    : 'border-slate-300 hover:border-teal-400 bg-white'
                 }`}
               >
-                <div className="h-12 w-12 rounded-2xl bg-slate-800 flex items-center justify-center text-emerald-400 mb-3">
+                <div className="h-12 w-12 rounded-2xl bg-teal-50 flex items-center justify-center text-teal-600 mb-3">
                   <Upload className="w-6 h-6" />
                 </div>
-                <p className="text-sm font-medium text-slate-200">
-                  Drop bank slip screenshot here
+                <p className="text-sm font-semibold text-slate-800">
+                  Tap to choose bank slip photo
                 </p>
-                <p className="text-xs text-slate-500 mt-1">
-                  or click to browse, or press <kbd className="px-1.5 py-0.5 rounded bg-slate-800 text-slate-300">Ctrl+V</kbd> to paste
-                </p>
-                <p className="text-[11px] text-slate-600 mt-4">
-                  Supports Techcombank, Vietcombank, MB, ACB, BIDV, TPBank, Momo...
+                <p className="text-xs text-slate-400 mt-1">
+                  We will read the amount &amp; date for you
                 </p>
               </div>
             ) : (
               <div className="flex-1 flex flex-col">
-                <div className="relative rounded-xl overflow-hidden border border-slate-800 bg-slate-950 flex-1 flex items-center justify-center max-h-[380px]">
+                <div className="relative rounded-2xl overflow-hidden border border-slate-200 bg-white flex-1 flex items-center justify-center max-h-[260px] sm:max-h-[380px]">
                   <img
                     src={previewUrl}
                     alt="Bank slip preview"
-                    className="max-h-[380px] w-auto object-contain"
+                    className="max-h-[260px] sm:max-h-[380px] w-auto object-contain"
                   />
                   {ocrLoading && (
-                    <div className="absolute inset-0 bg-slate-950/80 backdrop-blur-xs flex flex-col items-center justify-center gap-2">
-                      <Loader2 className="w-7 h-7 text-emerald-400 animate-spin" />
-                      <span className="text-xs font-medium text-emerald-300">
-                        Scanning bank slip with OCR...
+                    <div className="absolute inset-0 bg-white/85 backdrop-blur-xs flex flex-col items-center justify-center gap-2.5">
+                      <Loader2 className="w-8 h-8 text-teal-600 animate-spin" />
+                      <span className="text-sm font-semibold text-slate-700">
+                        Reading your bank slip...
                       </span>
                     </div>
                   )}
@@ -258,36 +252,18 @@ export const UploadSlipModal: React.FC<UploadSlipModalProps> = ({
                   <button
                     type="button"
                     onClick={() => fileInputRef.current?.click()}
-                    className="text-xs text-slate-400 hover:text-white flex items-center gap-1.5 cursor-pointer"
+                    className="text-xs font-medium text-slate-500 hover:text-slate-800 flex items-center gap-1.5 cursor-pointer py-1"
                   >
                     <ImageIcon className="w-3.5 h-3.5" />
-                    Replace image
+                    Choose another photo
                   </button>
                   {ocrDone && (
-                    <span className="inline-flex items-center gap-1 text-[11px] text-emerald-400">
-                      <CheckCircle2 className="w-3.5 h-3.5" />
-                      OCR complete ({ocrEngine})
+                    <span className="inline-flex items-center gap-1 text-xs font-medium text-emerald-600">
+                      <CheckCircle2 className="w-4 h-4" />
+                      Slip read!
                     </span>
                   )}
                 </div>
-
-                {rawText && (
-                  <div className="mt-2">
-                    <button
-                      type="button"
-                      onClick={() => setShowRawText((v) => !v)}
-                      className="text-[11px] text-slate-500 hover:text-slate-300 flex items-center gap-1 cursor-pointer"
-                    >
-                      <FileText className="w-3 h-3" />
-                      {showRawText ? 'Hide raw OCR text' : 'View raw OCR text'}
-                    </button>
-                    {showRawText && (
-                      <pre className="mt-1.5 p-2.5 rounded-lg bg-slate-900 border border-slate-800 text-[10px] text-slate-400 max-h-28 overflow-auto whitespace-pre-wrap">
-                        {rawText}
-                      </pre>
-                    )}
-                  </div>
-                )}
               </div>
             )}
             <input
@@ -302,40 +278,42 @@ export const UploadSlipModal: React.FC<UploadSlipModalProps> = ({
             />
           </div>
 
-          {/* Right: Form Fields */}
-          <div className="md:col-span-7 p-6 space-y-4">
-            {/* Type & Amount */}
+          {/* Right: Simple Form Fields */}
+          <div className="md:col-span-7 p-5 sm:p-6 space-y-4">
+            {/* Purpose first or Amount first */}
             <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
               <div>
-                <label className="block text-xs font-medium text-slate-400 mb-1.5">Type</label>
-                <div className="grid grid-cols-2 rounded-xl bg-slate-950 p-1 border border-slate-800">
+                <label className="block text-xs font-semibold text-slate-500 mb-1.5">
+                  Money In or Out?
+                </label>
+                <div className="grid grid-cols-2 rounded-2xl bg-slate-100 p-1">
                   <button
                     type="button"
                     onClick={() => setType('expense')}
-                    className={`py-1.5 text-xs font-medium rounded-lg transition cursor-pointer ${
+                    className={`py-2.5 text-xs font-semibold rounded-xl transition cursor-pointer ${
                       type === 'expense'
-                        ? 'bg-rose-500/20 text-rose-300 border border-rose-500/30'
-                        : 'text-slate-400 hover:text-white'
+                        ? 'bg-white text-rose-600 shadow-xs'
+                        : 'text-slate-500 hover:text-slate-800'
                     }`}
                   >
-                    Spent
+                    Paid Out
                   </button>
                   <button
                     type="button"
                     onClick={() => setType('topup')}
-                    className={`py-1.5 text-xs font-medium rounded-lg transition cursor-pointer ${
+                    className={`py-2.5 text-xs font-semibold rounded-xl transition cursor-pointer ${
                       type === 'topup'
-                        ? 'bg-emerald-500/20 text-emerald-300 border border-emerald-500/30'
-                        : 'text-slate-400 hover:text-white'
+                        ? 'bg-white text-emerald-600 shadow-xs'
+                        : 'text-slate-500 hover:text-slate-800'
                     }`}
                   >
-                    Added
+                    Added In
                   </button>
                 </div>
               </div>
 
               <div className="sm:col-span-2">
-                <label className="block text-xs font-medium text-slate-400 mb-1.5">
+                <label className="block text-xs font-semibold text-slate-500 mb-1.5">
                   Amount (VND) *
                 </label>
                 <div className="relative">
@@ -345,9 +323,9 @@ export const UploadSlipModal: React.FC<UploadSlipModalProps> = ({
                     value={amountInput}
                     onChange={(e) => setAmountInput(formatVndInput(e.target.value))}
                     placeholder="8.500.000"
-                    className="w-full rounded-xl border border-slate-700 bg-slate-950 px-3.5 py-2 pr-12 text-sm font-mono-num font-semibold text-white placeholder:text-slate-600 focus:border-emerald-500 focus:outline-none"
+                    className="w-full rounded-2xl border border-slate-200 bg-slate-50 px-4 py-3 pr-14 text-base font-mono-num font-bold text-slate-900 placeholder:text-slate-400 focus:border-teal-500 focus:bg-white focus:outline-none transition"
                   />
-                  <span className="absolute right-3.5 top-1/2 -translate-y-1/2 text-xs font-medium text-slate-500">
+                  <span className="absolute right-4 top-1/2 -translate-y-1/2 text-xs font-semibold text-slate-400">
                     VND
                   </span>
                 </div>
@@ -356,16 +334,16 @@ export const UploadSlipModal: React.FC<UploadSlipModalProps> = ({
 
             {/* Purpose (What it was done for) */}
             <div>
-              <label className="block text-xs font-medium text-emerald-300 mb-1.5">
-                What was this done for? (Purpose / Note) *
+              <label className="block text-xs font-semibold text-teal-700 mb-1.5">
+                What did you pay for? *
               </label>
               <input
                 ref={purposeInputRef}
                 type="text"
                 value={purpose}
                 onChange={(e) => setPurpose(e.target.value)}
-                placeholder="e.g. Box for frame packaging, Facebook Ads, Office supplies..."
-                className="w-full rounded-xl border border-emerald-500/40 bg-slate-950 px-3.5 py-2.5 text-sm text-white placeholder:text-slate-600 focus:border-emerald-400 focus:outline-none"
+                placeholder="e.g. Box for frame, Shipping, Office snacks..."
+                className="w-full rounded-2xl border-2 border-teal-200 bg-teal-50/30 px-4 py-3 text-base text-slate-900 placeholder:text-slate-400 focus:border-teal-500 focus:bg-white focus:outline-none transition"
               />
             </div>
 
@@ -373,13 +351,13 @@ export const UploadSlipModal: React.FC<UploadSlipModalProps> = ({
             <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
               {type === 'expense' && (
                 <div>
-                  <label className="block text-xs font-medium text-slate-400 mb-1.5">
+                  <label className="block text-xs font-semibold text-slate-500 mb-1.5">
                     Category
                   </label>
                   <select
                     value={category}
                     onChange={(e) => setCategory(e.target.value)}
-                    className="w-full rounded-xl border border-slate-700 bg-slate-950 px-3 py-2 text-sm text-white focus:border-emerald-500 focus:outline-none"
+                    className="w-full rounded-2xl border border-slate-200 bg-slate-50 px-3.5 py-3 text-sm text-slate-800 focus:border-teal-500 focus:bg-white focus:outline-none"
                   >
                     {allCategories.map((c) => (
                       <option key={c} value={c}>
@@ -391,99 +369,124 @@ export const UploadSlipModal: React.FC<UploadSlipModalProps> = ({
               )}
 
               <div className={type === 'topup' ? 'sm:col-span-2' : ''}>
-                <label className="block text-xs font-medium text-slate-400 mb-1.5">
+                <label className="block text-xs font-semibold text-slate-500 mb-1.5">
                   Date &amp; Time
                 </label>
                 <input
                   type="datetime-local"
                   value={transactionDate}
                   onChange={(e) => setTransactionDate(e.target.value)}
-                  className="w-full rounded-xl border border-slate-700 bg-slate-950 px-3 py-2 text-sm text-white focus:border-emerald-500 focus:outline-none"
+                  className="w-full rounded-2xl border border-slate-200 bg-slate-50 px-3.5 py-3 text-sm text-slate-800 focus:border-teal-500 focus:bg-white focus:outline-none"
                 />
               </div>
             </div>
 
-            {/* Extracted Bank Details */}
-            <div className="pt-2 border-t border-slate-800/80 space-y-3">
-              <p className="text-[11px] font-medium uppercase tracking-wider text-slate-500">
-                Bank Slip Details (Auto-filled by OCR)
-              </p>
-              <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
-                <div>
-                  <label className="block text-[11px] text-slate-400 mb-1">Recipient</label>
-                  <input
-                    type="text"
-                    value={recipient}
-                    onChange={(e) => setRecipient(e.target.value)}
-                    placeholder="TA KIEU HUNG"
-                    className="w-full rounded-lg border border-slate-800 bg-slate-950 px-3 py-1.5 text-xs text-slate-200 placeholder:text-slate-600 focus:border-slate-600 focus:outline-none"
-                  />
+            {/* Collapsible Bank Details */}
+            <div className="pt-1">
+              <button
+                type="button"
+                onClick={() => setShowBankDetails((v) => !v)}
+                className="inline-flex items-center gap-1.5 text-xs font-semibold text-slate-500 hover:text-slate-800 cursor-pointer py-1"
+              >
+                {showBankDetails ? (
+                  <ChevronUp className="w-4 h-4" />
+                ) : (
+                  <ChevronDown className="w-4 h-4" />
+                )}
+                {showBankDetails ? 'Hide extra bank details' : 'Show extra bank details'}
+                {recipient && !showBankDetails && (
+                  <span className="text-slate-400 font-normal">({recipient})</span>
+                )}
+              </button>
+
+              {showBankDetails && (
+                <div className="mt-3 p-4 rounded-2xl bg-slate-50 border border-slate-200/80 space-y-3">
+                  <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+                    <div>
+                      <label className="block text-[11px] font-medium text-slate-500 mb-1">
+                        Paid To (Recipient)
+                      </label>
+                      <input
+                        type="text"
+                        value={recipient}
+                        onChange={(e) => setRecipient(e.target.value)}
+                        placeholder="TA KIEU HUNG"
+                        className="w-full rounded-xl border border-slate-200 bg-white px-3 py-2 text-xs text-slate-800 focus:border-teal-500 focus:outline-none"
+                      />
+                    </div>
+                    <div>
+                      <label className="block text-[11px] font-medium text-slate-500 mb-1">
+                        Bank Name
+                      </label>
+                      <input
+                        type="text"
+                        value={bankName}
+                        onChange={(e) => setBankName(e.target.value)}
+                        placeholder="TECHCOMBANK"
+                        className="w-full rounded-xl border border-slate-200 bg-white px-3 py-2 text-xs text-slate-800 focus:border-teal-500 focus:outline-none"
+                      />
+                    </div>
+                    <div>
+                      <label className="block text-[11px] font-medium text-slate-500 mb-1">
+                        Account Number
+                      </label>
+                      <input
+                        type="text"
+                        value={accountNumber}
+                        onChange={(e) => setAccountNumber(e.target.value)}
+                        placeholder="9013 7319 85"
+                        className="w-full rounded-xl border border-slate-200 bg-white px-3 py-2 text-xs font-mono-num text-slate-800 focus:border-teal-500 focus:outline-none"
+                      />
+                    </div>
+                    <div>
+                      <label className="block text-[11px] font-medium text-slate-500 mb-1">
+                        Reference Code
+                      </label>
+                      <input
+                        type="text"
+                        value={transactionRef}
+                        onChange={(e) => setTransactionRef(e.target.value)}
+                        placeholder="FT26324561596086"
+                        className="w-full rounded-xl border border-slate-200 bg-white px-3 py-2 text-xs font-mono-num text-slate-800 focus:border-teal-500 focus:outline-none"
+                      />
+                    </div>
+                  </div>
+                  <div>
+                    <label className="block text-[11px] font-medium text-slate-500 mb-1">
+                      Message on Bank Slip
+                    </label>
+                    <input
+                      type="text"
+                      value={slipMessage}
+                      onChange={(e) => setSlipMessage(e.target.value)}
+                      placeholder="box for frame"
+                      className="w-full rounded-xl border border-slate-200 bg-white px-3 py-2 text-xs text-slate-800 focus:border-teal-500 focus:outline-none"
+                    />
+                  </div>
                 </div>
-                <div>
-                  <label className="block text-[11px] text-slate-400 mb-1">Bank</label>
-                  <input
-                    type="text"
-                    value={bankName}
-                    onChange={(e) => setBankName(e.target.value)}
-                    placeholder="TECHCOMBANK"
-                    className="w-full rounded-lg border border-slate-800 bg-slate-950 px-3 py-1.5 text-xs text-slate-200 placeholder:text-slate-600 focus:border-slate-600 focus:outline-none"
-                  />
-                </div>
-                <div>
-                  <label className="block text-[11px] text-slate-400 mb-1">Account No.</label>
-                  <input
-                    type="text"
-                    value={accountNumber}
-                    onChange={(e) => setAccountNumber(e.target.value)}
-                    placeholder="9013 7319 85"
-                    className="w-full rounded-lg border border-slate-800 bg-slate-950 px-3 py-1.5 text-xs font-mono-num text-slate-200 placeholder:text-slate-600 focus:border-slate-600 focus:outline-none"
-                  />
-                </div>
-                <div>
-                  <label className="block text-[11px] text-slate-400 mb-1">Transaction Ref</label>
-                  <input
-                    type="text"
-                    value={transactionRef}
-                    onChange={(e) => setTransactionRef(e.target.value)}
-                    placeholder="FT26324561596086"
-                    className="w-full rounded-lg border border-slate-800 bg-slate-950 px-3 py-1.5 text-xs font-mono-num text-slate-200 placeholder:text-slate-600 focus:border-slate-600 focus:outline-none"
-                  />
-                </div>
-              </div>
-              <div>
-                <label className="block text-[11px] text-slate-400 mb-1">
-                  Slip Transfer Message (Lời nhắn)
-                </label>
-                <input
-                  type="text"
-                  value={slipMessage}
-                  onChange={(e) => setSlipMessage(e.target.value)}
-                  placeholder="box for frame"
-                  className="w-full rounded-lg border border-slate-800 bg-slate-950 px-3 py-1.5 text-xs text-slate-200 placeholder:text-slate-600 focus:border-slate-600 focus:outline-none"
-                />
-              </div>
+              )}
             </div>
 
             {error && (
-              <p className="text-xs text-rose-400 bg-rose-500/10 border border-rose-500/20 rounded-lg px-3 py-2">
+              <p className="text-xs text-rose-600 bg-rose-50 border border-rose-200 rounded-xl px-3.5 py-2.5">
                 {error}
               </p>
             )}
 
-            <div className="flex items-center justify-end gap-3 pt-2">
+            <div className="flex items-center justify-end gap-2.5 pt-2">
               <button
                 type="button"
                 onClick={onClose}
-                className="rounded-xl px-4 py-2 text-xs font-medium text-slate-300 hover:bg-slate-800 transition cursor-pointer"
+                className="rounded-2xl px-4 py-3 text-sm font-medium text-slate-600 hover:bg-slate-100 transition cursor-pointer"
               >
                 Cancel
               </button>
               <button
                 type="submit"
                 disabled={saving || ocrLoading}
-                className="rounded-xl bg-emerald-500 hover:bg-emerald-400 disabled:opacity-50 px-5 py-2 text-xs font-semibold text-slate-950 transition cursor-pointer"
+                className="flex-1 sm:flex-none rounded-2xl bg-teal-600 hover:bg-teal-500 disabled:opacity-50 px-6 py-3 text-sm font-semibold text-white shadow-md shadow-teal-600/20 transition cursor-pointer"
               >
-                {saving ? 'Saving...' : 'Save Transaction'}
+                {saving ? 'Saving...' : 'Save Payment'}
               </button>
             </div>
           </div>

@@ -121,8 +121,8 @@ export default function App() {
 
   if (!authChecked) {
     return (
-      <div className="min-h-screen bg-slate-950 flex items-center justify-center text-xs text-slate-500">
-        Loading FinControl...
+      <div className="min-h-screen bg-slate-50 flex items-center justify-center text-sm text-slate-400">
+        Opening your card tracker...
       </div>
     );
   }
@@ -132,20 +132,20 @@ export default function App() {
   }
 
   return (
-    <div className="min-h-screen bg-slate-950 text-slate-100">
+    <div className="min-h-screen bg-slate-50 text-slate-900">
       {/* Top Bar */}
-      <header className="sticky top-0 z-30 border-b border-slate-800/80 bg-slate-950/85 backdrop-blur-md">
+      <header className="sticky top-0 z-30 border-b border-slate-200/80 bg-white/90 backdrop-blur-md">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 h-16 flex items-center justify-between gap-4">
           <div className="flex items-center gap-3">
-            <div className="h-9 w-9 rounded-xl bg-emerald-500/15 border border-emerald-500/30 flex items-center justify-center text-emerald-400">
+            <div className="h-10 w-10 rounded-2xl bg-teal-50 border border-teal-200/70 flex items-center justify-center text-teal-600">
               <Wallet className="w-5 h-5" />
             </div>
             <div>
-              <h1 className="text-base font-bold tracking-tight text-white leading-none">
-                FinControl
+              <h1 className="text-base font-bold tracking-tight text-slate-900 leading-none">
+                My Debit Card
               </h1>
-              <p className="text-[11px] text-slate-400 mt-0.5">
-                Debit Card &amp; Bank Slip Ledger (VND)
+              <p className="text-xs text-slate-500 mt-0.5">
+                Track money added &amp; bank slips
               </p>
             </div>
           </div>
@@ -154,27 +154,27 @@ export default function App() {
             <button
               type="button"
               onClick={() => setShowTopupModal(true)}
-              className="hidden sm:inline-flex items-center gap-1.5 rounded-xl border border-emerald-500/30 bg-emerald-500/10 hover:bg-emerald-500/20 px-3.5 py-2 text-xs font-semibold text-emerald-300 transition cursor-pointer"
+              className="hidden sm:inline-flex items-center gap-1.5 rounded-2xl border border-emerald-200 bg-emerald-50 hover:bg-emerald-100 px-4 py-2.5 text-xs font-semibold text-emerald-700 transition cursor-pointer"
             >
               <PlusCircle className="w-4 h-4" />
-              <span>Add Funds</span>
+              <span>Add Money</span>
             </button>
 
             <button
               type="button"
               onClick={handleDirectSlipPick}
-              className="hidden sm:inline-flex items-center gap-1.5 rounded-xl bg-emerald-500 hover:bg-emerald-400 px-4 py-2 text-xs font-semibold text-slate-950 shadow-lg shadow-emerald-500/20 transition cursor-pointer"
+              className="hidden sm:inline-flex items-center gap-1.5 rounded-2xl bg-teal-600 hover:bg-teal-500 px-4 py-2.5 text-xs font-semibold text-white shadow-md shadow-teal-600/20 transition cursor-pointer"
             >
               <Upload className="w-4 h-4" />
-              <span>Upload Slip</span>
+              <span>Add Bank Slip</span>
             </button>
 
             {authRequired && (
               <button
                 type="button"
                 onClick={handleLogout}
-                title="Lock / Logout"
-                className="rounded-xl border border-slate-800 p-2 text-slate-400 hover:text-white hover:bg-slate-800 transition cursor-pointer"
+                title="Lock"
+                className="rounded-xl border border-slate-200 p-2 text-slate-500 hover:text-slate-800 hover:bg-slate-100 transition cursor-pointer"
               >
                 <LogOut className="w-4 h-4" />
               </button>
@@ -218,24 +218,24 @@ export default function App() {
       />
 
       {/* Mobile Sticky Bottom Action Bar */}
-      <div className="sm:hidden fixed bottom-0 inset-x-0 z-40 border-t border-slate-800/90 bg-slate-950/95 backdrop-blur-md px-3 py-2.5 pb-[calc(0.625rem+env(safe-area-inset-bottom))]">
+      <div className="sm:hidden fixed bottom-0 inset-x-0 z-40 border-t border-slate-200 bg-white/95 backdrop-blur-md px-3 py-2.5 pb-[calc(0.625rem+env(safe-area-inset-bottom))] shadow-[0_-4px_20px_rgba(15,23,42,0.06)]">
         <div className="grid grid-cols-2 gap-2.5">
           <button
             type="button"
             onClick={() => setShowTopupModal(true)}
-            className="flex items-center justify-center gap-2 rounded-xl border border-emerald-500/30 bg-emerald-500/10 active:bg-emerald-500/25 py-3 text-sm font-semibold text-emerald-300 transition cursor-pointer"
+            className="flex items-center justify-center gap-2 rounded-2xl border border-emerald-200 bg-emerald-50 active:bg-emerald-100 py-3.5 text-sm font-semibold text-emerald-700 transition cursor-pointer"
           >
             <PlusCircle className="w-4 h-4" />
-            <span>Add Funds</span>
+            <span>Add Money</span>
           </button>
 
           <button
             type="button"
             onClick={handleDirectSlipPick}
-            className="flex items-center justify-center gap-2 rounded-xl bg-emerald-500 active:bg-emerald-400 py-3 text-sm font-semibold text-slate-950 shadow-lg shadow-emerald-500/20 transition cursor-pointer"
+            className="flex items-center justify-center gap-2 rounded-2xl bg-teal-600 active:bg-teal-700 py-3.5 text-sm font-semibold text-white shadow-md shadow-teal-600/20 transition cursor-pointer"
           >
             <Upload className="w-4 h-4" />
-            <span>Upload Slip</span>
+            <span>Add Bank Slip</span>
           </button>
         </div>
       </div>
