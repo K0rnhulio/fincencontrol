@@ -1,0 +1,8 @@
+node_modules/
+dist/
+data/
+data_test/
+.env
+*.traineddata
+*.log
+.DS_Store

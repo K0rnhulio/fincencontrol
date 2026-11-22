@@ -1,0 +1,46 @@
+{
+  "name": "fincencontrol",
+  "version": "1.0.0",
+  "description": "Debit card & Vietnamese bank slip finance tracker with OCR",
+  "main": "dist/server/index.js",
+  "scripts": {
+    "dev": "concurrently -n api,web -c cyan,green \"tsx watch server/index.ts\" \"vite\"",
+    "dev:server": "PORT=3001 tsx watch server/index.ts",
+    "dev:client": "vite",
+    "build": "vite build && tsc -p tsconfig.server.json",
+    "start": "node dist/server/index.js",
+    "typecheck": "tsc --noEmit && tsc -p tsconfig.server.json --noEmit"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
+  "type": "commonjs",
+  "dependencies": {
+    "better-sqlite3": "^12.8.0",
+    "cookie-parser": "^1.4.7",
+    "cors": "^2.8.6",
+    "dotenv": "^17.4.1",
+    "express": "^5.2.1",
+    "lucide-react": "^1.21.0",
+    "multer": "^2.1.1",
+    "react": "^19.2.4",
+    "react-dom": "^19.2.4",
+    "tesseract.js": "^7.0.0"
+  },
+  "devDependencies": {
+    "@types/better-sqlite3": "^7.6.13",
+    "@types/cookie-parser": "^1.4.10",
+    "@types/cors": "^2.8.19",
+    "@types/express": "^5.0.6",
+    "@types/multer": "^2.1.0",
+    "@types/node": "^25.5.0",
+    "@types/react": "^19.2.14",
+    "@types/react-dom": "^19.2.33",
+    "@vitejs/plugin-react": "^6.0.1",
+    "concurrently": "^9.2.1",
+    "tailwindcss": "^4.2.2",
+    "tsx": "^4.21.0",
+    "typescript": "^6.0.2",
+    "vite": "^8.0.3"
+  }
+}

@@ -1,0 +1,19 @@
+services:
+  fincontrol:
+    build: .
+    container_name: fincontrol
+    restart: unless-stopped
+    ports:
+      - "3000:3000"
+    environment:
+      - PORT=3000
+      - DATA_DIR=/app/data
+      # Optional: set a password to lock the dashboard
+      - APP_PASSWORD=${APP_PASSWORD:-}
+      # Optional: set a Gemini API key for even higher-accuracy Vision OCR
+      - GEMINI_API_KEY=${GEMINI_API_KEY:-}
+    volumes:
+      - fincontrol_data:/app/data
+
+volumes:
+  fincontrol_data:
