@@ -12,12 +12,14 @@ import { DEFAULT_CATEGORIES, OcrResult, TransactionType } from '../types';
 import { formatVndInput, parseVndInput } from '../utils/format';
 
 interface UploadSlipModalProps {
+  initialFile?: File | null;
   onClose: () => void;
   onSaved: () => void;
   existingCategories: string[];
 }
 
 export const UploadSlipModal: React.FC<UploadSlipModalProps> = ({
+  initialFile,
   onClose,
   onSaved,
   existingCategories,
@@ -101,6 +103,13 @@ export const UploadSlipModal: React.FC<UploadSlipModalProps> = ({
     }
   };
 
+  // If opened with an initialFile from the direct image picker, scan it immediately
+  useEffect(() => {
+    if (initialFile) {
+      processFile(initialFile);
+    }
+  }, [initialFile]);
+
   // Allow Ctrl+V / Cmd+V paste of screenshot anywhere while modal is open
   useEffect(() => {
     const handlePaste = (e: ClipboardEvent) => {
@@ -168,10 +177,10 @@ export const UploadSlipModal: React.FC<UploadSlipModalProps> = ({
   };
 
   return (
-    <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/75 backdrop-blur-sm p-4 overflow-y-auto">
-      <div className="w-full max-w-4xl rounded-2xl border border-slate-800 bg-slate-900 shadow-2xl overflow-hidden my-auto">
+    <div className="fixed inset-0 z-50 flex items-end sm:items-center justify-center bg-black/75 backdrop-blur-sm p-0 sm:p-4 overflow-y-auto">
+      <div className="w-full max-w-4xl rounded-t-2xl sm:rounded-2xl border border-slate-800 bg-slate-900 shadow-2xl overflow-hidden max-h-[94dvh] flex flex-col">
         {/* Header */}
-        <div className="flex items-center justify-between px-6 py-4 border-b border-slate-800">
+        <div className="flex items-center justify-between px-4 sm:px-6 py-3.5 sm:py-4 border-b border-slate-800 shrink-0">
           <div className="flex items-center gap-2.5">
             <div className="h-9 w-9 rounded-xl bg-emerald-500/15 border border-emerald-500/30 flex items-center justify-center text-emerald-400">
               <Sparkles className="w-4 h-4" />
@@ -191,7 +200,7 @@ export const UploadSlipModal: React.FC<UploadSlipModalProps> = ({
           </button>
         </div>
 
-        <form onSubmit={handleSubmit} className="grid grid-cols-1 md:grid-cols-12">
+        <form onSubmit={handleSubmit} className="grid grid-cols-1 md:grid-cols-12 overflow-y-auto flex-1">
           {/* Left: Slip Dropzone / Preview */}
           <div className="md:col-span-5 p-5 border-b md:border-b-0 md:border-r border-slate-800 bg-slate-950/50 flex flex-col">
             {!previewUrl ? (

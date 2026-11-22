@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useCallback } from 'react';
+import React, { useState, useEffect, useCallback, useRef } from 'react';
 import { Upload, PlusCircle, Wallet, LogOut } from 'lucide-react';
 import { SummaryStats, Transaction } from './types';
 import { LoginGate } from './components/LoginGate';
@@ -41,8 +41,24 @@ export default function App() {
   });
 
   const [showUploadModal, setShowUploadModal] = useState(false);
+  const [initialSlipFile, setInitialSlipFile] = useState<File | null>(null);
   const [showTopupModal, setShowTopupModal] = useState(false);
   const [selectedTx, setSelectedTx] = useState<Transaction | null>(null);
+
+  const directSlipInputRef = useRef<HTMLInputElement>(null);
+
+  const handleDirectSlipPick = () => {
+    directSlipInputRef.current?.click();
+  };
+
+  const handleDirectSlipChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (file) {
+      setInitialSlipFile(file);
+      setShowUploadModal(true);
+    }
+    e.target.value = '';
+  };
 
   const checkAuth = useCallback(async () => {
     try {
@@ -138,7 +154,7 @@ export default function App() {
             <button
               type="button"
               onClick={() => setShowTopupModal(true)}
-              className="inline-flex items-center gap-1.5 rounded-xl border border-emerald-500/30 bg-emerald-500/10 hover:bg-emerald-500/20 px-3.5 py-2 text-xs font-semibold text-emerald-300 transition cursor-pointer"
+              className="hidden sm:inline-flex items-center gap-1.5 rounded-xl border border-emerald-500/30 bg-emerald-500/10 hover:bg-emerald-500/20 px-3.5 py-2 text-xs font-semibold text-emerald-300 transition cursor-pointer"
             >
               <PlusCircle className="w-4 h-4" />
               <span>Add Funds</span>
@@ -146,8 +162,8 @@ export default function App() {
 
             <button
               type="button"
-              onClick={() => setShowUploadModal(true)}
-              className="inline-flex items-center gap-1.5 rounded-xl bg-emerald-500 hover:bg-emerald-400 px-4 py-2 text-xs font-semibold text-slate-950 shadow-lg shadow-emerald-500/20 transition cursor-pointer"
+              onClick={handleDirectSlipPick}
+              className="hidden sm:inline-flex items-center gap-1.5 rounded-xl bg-emerald-500 hover:bg-emerald-400 px-4 py-2 text-xs font-semibold text-slate-950 shadow-lg shadow-emerald-500/20 transition cursor-pointer"
             >
               <Upload className="w-4 h-4" />
               <span>Upload Slip</span>
@@ -168,7 +184,7 @@ export default function App() {
       </header>
 
       {/* Main Content */}
-      <main className="max-w-7xl mx-auto px-4 sm:px-6 py-6 space-y-6">
+      <main className="max-w-7xl mx-auto px-3 sm:px-6 py-4 sm:py-6 pb-24 sm:pb-8 space-y-4 sm:space-y-6">
         <OverviewCards summary={summary} />
 
         <ChartsSection
@@ -192,10 +208,46 @@ export default function App() {
         />
       </main>
 
+      {/* Hidden direct image picker */}
+      <input
+        ref={directSlipInputRef}
+        type="file"
+        accept="image/*"
+        className="hidden"
+        onChange={handleDirectSlipChange}
+      />
+
+      {/* Mobile Sticky Bottom Action Bar */}
+      <div className="sm:hidden fixed bottom-0 inset-x-0 z-40 border-t border-slate-800/90 bg-slate-950/95 backdrop-blur-md px-3 py-2.5 pb-[calc(0.625rem+env(safe-area-inset-bottom))]">
+        <div className="grid grid-cols-2 gap-2.5">
+          <button
+            type="button"
+            onClick={() => setShowTopupModal(true)}
+            className="flex items-center justify-center gap-2 rounded-xl border border-emerald-500/30 bg-emerald-500/10 active:bg-emerald-500/25 py-3 text-sm font-semibold text-emerald-300 transition cursor-pointer"
+          >
+            <PlusCircle className="w-4 h-4" />
+            <span>Add Funds</span>
+          </button>
+
+          <button
+            type="button"
+            onClick={handleDirectSlipPick}
+            className="flex items-center justify-center gap-2 rounded-xl bg-emerald-500 active:bg-emerald-400 py-3 text-sm font-semibold text-slate-950 shadow-lg shadow-emerald-500/20 transition cursor-pointer"
+          >
+            <Upload className="w-4 h-4" />
+            <span>Upload Slip</span>
+          </button>
+        </div>
+      </div>
+
       {/* Modals */}
       {showUploadModal && (
         <UploadSlipModal
-          onClose={() => setShowUploadModal(false)}
+          initialFile={initialSlipFile}
+          onClose={() => {
+            setShowUploadModal(false);
+            setInitialSlipFile(null);
+          }}
           onSaved={fetchData}
           existingCategories={summary.categories}
         />
