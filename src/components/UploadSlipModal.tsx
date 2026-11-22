@@ -280,55 +280,23 @@ export const UploadSlipModal: React.FC<UploadSlipModalProps> = ({
 
           {/* Right: Simple Form Fields */}
           <div className="md:col-span-7 p-5 sm:p-6 space-y-4">
-            {/* Purpose first or Amount first */}
-            <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
-              <div>
-                <label className="block text-xs font-semibold text-slate-500 mb-1.5">
-                  Money In or Out?
-                </label>
-                <div className="grid grid-cols-2 rounded-2xl bg-slate-100 p-1">
-                  <button
-                    type="button"
-                    onClick={() => setType('expense')}
-                    className={`py-2.5 text-xs font-semibold rounded-xl transition cursor-pointer ${
-                      type === 'expense'
-                        ? 'bg-white text-rose-600 shadow-xs'
-                        : 'text-slate-500 hover:text-slate-800'
-                    }`}
-                  >
-                    Paid Out
-                  </button>
-                  <button
-                    type="button"
-                    onClick={() => setType('topup')}
-                    className={`py-2.5 text-xs font-semibold rounded-xl transition cursor-pointer ${
-                      type === 'topup'
-                        ? 'bg-white text-emerald-600 shadow-xs'
-                        : 'text-slate-500 hover:text-slate-800'
-                    }`}
-                  >
-                    Added In
-                  </button>
-                </div>
-              </div>
-
-              <div className="sm:col-span-2">
-                <label className="block text-xs font-semibold text-slate-500 mb-1.5">
-                  Amount (VND) *
-                </label>
-                <div className="relative">
-                  <input
-                    type="text"
-                    inputMode="numeric"
-                    value={amountInput}
-                    onChange={(e) => setAmountInput(formatVndInput(e.target.value))}
-                    placeholder="8.500.000"
-                    className="w-full rounded-2xl border border-slate-200 bg-slate-50 px-4 py-3 pr-14 text-base font-mono-num font-bold text-slate-900 placeholder:text-slate-400 focus:border-teal-500 focus:bg-white focus:outline-none transition"
-                  />
-                  <span className="absolute right-4 top-1/2 -translate-y-1/2 text-xs font-semibold text-slate-400">
-                    VND
-                  </span>
-                </div>
+            {/* Amount */}
+            <div>
+              <label className="block text-xs font-semibold text-slate-500 mb-1.5">
+                How much was paid? (VND) *
+              </label>
+              <div className="relative">
+                <input
+                  type="text"
+                  inputMode="numeric"
+                  value={amountInput}
+                  onChange={(e) => setAmountInput(formatVndInput(e.target.value))}
+                  placeholder="8.500.000"
+                  className="w-full rounded-2xl border border-slate-200 bg-slate-50 px-4 py-3 pr-14 text-lg font-mono-num font-bold text-slate-900 placeholder:text-slate-400 focus:border-teal-500 focus:bg-white focus:outline-none transition"
+                />
+                <span className="absolute right-4 top-1/2 -translate-y-1/2 text-xs font-semibold text-slate-400">
+                  VND
+                </span>
               </div>
             </div>
 
